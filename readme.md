@@ -2,7 +2,8 @@
 
 This notebook guides you through setting up your environment for Nerfstudio, including installing Anaconda, CUDA, PyTorch, and the necessary projects.
 
-> **Note:** Execute these commands inside a folder
+
+> **Note:** Execute these commands inside a folder. If you already have Nerfstudio installed, you can clone your environment, uninstall Nerfstudio, and install my fork (steps 7 and 8).
 
 > **Important:** This installation process follows the original Nerfstudio installation with one key difference—step **7** installs my fork of Nerfstudio. (Step **8** is used only for Gaussian Splatting.)
 
@@ -69,6 +70,7 @@ pip install -e .
 ---
 
 ## 8. Install Gaussian Splatting
+> **Note:** This point is required only if you want to use Gaussian Splatting with NeRFStudio.
 Install Gaussian Splatting:
 
 ```bash
