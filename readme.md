@@ -157,6 +157,8 @@ Open the `rubber duck blender.blend` file.
 Switch to the Scripting tab.  
 ![Script Section](readme_images/script_section.png)
 
+> **Note:** If you are looking for where to download HDR files, you can get them for free from [HDRI Skies Free HDRIs](https://hdri-skies.com/free-hdris/).
+
 
 Select the script you wish to execute from the `BlenderScripts` folder.  
 Two options:  
@@ -187,21 +189,26 @@ Two options:
 
     ## blenderScriptingOld.py
 
-![BlenderScriptingOld](readme_images/blenderScriptOld.png)
+    ![BlenderScriptingOld](readme_images/blenderScriptOld.png)
 
-### Settings:
-- **Render base path:** Specifies where to save the rendering results.
-- **Environments base path:** Folder where HDR files are searched.
-- **Environment:** Allows you to select and directly apply HDR files.
-- **Number of Rings:** Specifies the number of rings in the top hemisphere (note: the top camera and the first ring are implied).
-- **Cameras per Ring:** Specifies the number of cameras for each ring.
-- **Sphere radius:** Defines the distance of the cameras from the center.
-- **Sphere Center:** Sets the center of the sphere.
-- **Noise Amount:** Indicates how much noise to add during the creation of the cameras.
+    ### Settings:
+    - **Render base path:** Specifies where to save the rendering results.
+    - **Environments base path:** Folder where HDR files are searched.
+    - **Environment:** Allows you to select and directly apply HDR files.
+    - **Number of Rings:** Specifies the number of rings in the top hemisphere (note: the top camera and the first ring are implied).
+    - **Cameras per Ring:** Specifies the number of cameras for each ring.
+    - **Sphere radius:** Defines the distance of the cameras from the center.
+    - **Sphere Center:** Sets the center of the sphere.
+    - **Noise Amount:** Indicates how much noise to add during the creation of the cameras.
 
-### Buttons:
-- **Create Camera:** Creates the cameras.
-- **Render All Cameras:** Begins the rendering process for the currently selected environment only.
-- **Clear Camera:** Deletes all created cameras.
-- **Print Camera Data:** Outputs logging information to the console.
-- **Render all environments:** Cycles through all found environments and renders them one at a time.
+    ### Buttons:
+    - **Create Camera:** Creates the cameras.
+    - **Render All Cameras:** Begins the rendering process for the currently selected environment only.
+    - **Clear Camera:** Deletes all created cameras.
+    - **Print Camera Data:** Outputs logging information to the console.
+    - **Render all environments:** Cycles through all found environments and renders them one at a time.
+
+
+
+
+
