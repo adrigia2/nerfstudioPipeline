@@ -7,6 +7,7 @@ import subprocess
 import time
 
 import asyncio
+import argparse
 from websockets.server import serve
 import websockets
 import nest_asyncio
@@ -24,9 +25,6 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["PYTHONUTF8"] = "1"
 
 # %%
-model_path = "D:/ext-120 epochs"
-
-# %%
 from diffusers import StableDiffusionImg2ImgPipeline
 import torch
 import numpy as np
@@ -37,6 +35,36 @@ import shutil
 process_killed_event = threading.Event()
 max_attempts = 20
 current_time = time.gmtime()
+
+import argparse
+
+parser = argparse.ArgumentParser(description="Script that accepts command line arguments")
+parser.add_argument("-i", "--iterations", type=int, default=10,
+                    help="Number of iterations to perform (default: 10)")
+
+parser.add_argument("-m", "--model", type=str, default="instant-ngp",
+                    help="Model to use (default: instant-ngp) ")
+
+parser.add_argument("-s", "--steps", type=int, default=3500,
+                    help="Number of steps (default: 3500)")
+
+parser.add_argument("-d", "--not_tokenized", action="store_true",
+                    help="If the prompt is not tokenized (default: False if arg not specified)")
+
+args = parser.parse_args()
+
+max_iterations = args.iterations
+model_type = args.model
+steps = args.steps
+not_tokenized = args.not_tokenized
+
+print("-------------------------------------")
+print(f"Max iterations: {max_iterations}")
+print(f"Model type: {model_type}")
+print(f"Number of steps: {steps}")
+print(f"Not Tokenized: {not_tokenized}")
+print("-------------------------------------")
+
 
 class TrainElement:
     def __init__(self, prospective: str, filename: str, init_image_name: str):
@@ -52,6 +80,53 @@ class SocketMessage:
 
     def to_pickle(self):
         return pickle.dumps(self)
+
+
+if not_tokenized:
+    model_path = "AdrianoC/RubberDuckProspectStableDiffusion_1_5"
+
+    # Define the list of TrainElements
+    train_elements = {
+        "Top": TrainElement("Top", "top_camera.png", "init_top.png"),
+        "Right Top": TrainElement("Right Top", "right_top.png", "init_right_top.png"),
+        "Back Right Top": TrainElement("Back Right Top", "back_right_top.png", "init_back_right_top.png"),
+        "Back Top": TrainElement("Back Top", "back_top.png", "init_back_top.png"),
+        "Back Left Top": TrainElement("Back Left Top", "back_left_top.png", "init_back_left_top.png"),
+        "Left Top": TrainElement("Left Top", "left_top.png", "init_left_top.png"),
+        "Front Left Top": TrainElement("Front Left Top", "front_left_top.png", "init_front_left_top.png"),
+        "Front Top": TrainElement("Front Top", "front_top.png", "init_front_top.png"),
+        "Front Right Top": TrainElement("Front Right Top", "front_right_top.png", "init_front_right_top.png"),
+        "Right": TrainElement("Right", "right.png", "init_right.png"),
+        "Back Right": TrainElement("Back Right", "back_right.png", "init_back_right.png"),
+        "Back": TrainElement("Back", "back.png", "init_back.png"),
+        "Back Left": TrainElement("Back Left", "back_left.png", "init_back_left.png"),
+        "Left": TrainElement("Left", "left.png", "init_left.png"),
+        "Front Left": TrainElement("Front Left", "front_left.png", "init_front_left.png"),
+        "Front": TrainElement("Front", "front.png", "init_front.png"),
+        "Front Right": TrainElement("Front Right", "front_right.png", "init_front_right.png")
+    }
+else:
+    model_path="AdrianoC/RubberDuckProspectStableDiffusion_1_5_tokens"
+    train_elements = {
+        "<top>": TrainElement("Top", "top_camera.png", "init_top.png"),
+        "<left_top>": TrainElement("Right Top", "right_top.png", "init_right_top.png"),
+        "<back_left_top>": TrainElement("Back Right Top", "back_right_top.png", "init_back_right_top.png"),
+        "<back_top>": TrainElement("Back Top", "back_top.png", "init_back_top.png"),
+        "<back_right_top>": TrainElement("Back Left Top", "back_left_top.png", "init_back_left_top.png"),
+        "<right_top>": TrainElement("Left Top", "left_top.png", "init_left_top.png"),
+        "<front_right_top>": TrainElement("Front Left Top", "front_left_top.png", "init_front_left_top.png"),
+        "<front_top>": TrainElement("Front Top", "front_top.png", "init_front_top.png"),
+        "<front_left_top>": TrainElement("Front Right Top", "front_right_top.png", "init_front_right_top.png"),
+        "<left>": TrainElement("Right", "right.png", "init_right.png"),
+        "<back_left>": TrainElement("Back Right", "back_right.png", "init_back_right.png"),
+        "<back>": TrainElement("Back", "back.png", "init_back.png"),
+        "<back_right>": TrainElement("Back Left", "back_left.png", "init_back_left.png"),
+        "<right>": TrainElement("Left", "left.png", "init_left.png"),
+        "<front_right>": TrainElement("Front Left", "front_left.png", "init_front_left.png"),
+        "<front>": TrainElement("Front", "front.png", "init_front.png"),
+        "<front_left>": TrainElement("Front Right", "front_right.png", "init_front_right.png")
+    }
+
 
 # %%
 # Carica la pipeline
@@ -83,67 +158,6 @@ if not os.path.exists(iter_folder):
 
 if not os.path.exists(diff_mod_image_folder):
     os.makedirs(diff_mod_image_folder)
-
-# Define the list of TrainElements
-"""
-train_elements = {
-    "Top": TrainElement("Top", "top_camera.png", "init_top.png"),
-    "Right Top": TrainElement("Right Top", "right_top.png", "init_right_top.png"),
-    "Back Right Top": TrainElement("Back Right Top", "back_right_top.png", "init_back_right_top.png"),
-    "Back Top": TrainElement("Back Top", "back_top.png", "init_back_top.png"),
-    "Back Left Top": TrainElement("Back Left Top", "back_left_top.png", "init_back_left_top.png"),
-    "Left Top": TrainElement("Left Top", "left_top.png", "init_left_top.png"),
-    "Front Left Top": TrainElement("Front Left Top", "front_left_top.png", "init_front_left_top.png"),
-    "Front Top": TrainElement("Front Top", "front_top.png", "init_front_top.png"),
-    "Front Right Top": TrainElement("Front Right Top", "front_right_top.png", "init_front_right_top.png"),
-    "Right": TrainElement("Right", "right.png", "init_right.png"),
-    "Back Right": TrainElement("Back Right", "back_right.png", "init_back_right.png"),
-    "Back": TrainElement("Back", "back.png", "init_back.png"),
-    "Back Left": TrainElement("Back Left", "back_left.png", "init_back_left.png"),
-    "Left": TrainElement("Left", "left.png", "init_left.png"),
-    "Front Left": TrainElement("Front Left", "front_left.png", "init_front_left.png"),
-    "Front": TrainElement("Front", "front.png", "init_front.png"),
-    "Front Right": TrainElement("Front Right", "front_right.png", "init_front_right.png")
-}
-"""
-
-prospective = ["<top>", 
-"<back>",
-"<front>",
-"<right>",
-"<left>",
-"<front_left_top>",
-"<front_right_top>",
-"<back_right_top>",
-"<back_left_top>",
-"<left_top>",
-"<right_top>",
-"<front_top>",
-"<front_right>",
-"<front_left>",
-"<back_right>",
-"<back_top>",
-"<back_left>"]
-
-train_elements = {
-    "<top>": TrainElement("Top", "top_camera.png", "init_top.png"),
-    "<left_top>": TrainElement("Right Top", "right_top.png", "init_right_top.png"),
-    "<back_left_top>": TrainElement("Back Right Top", "back_right_top.png", "init_back_right_top.png"),
-    "<back_top>": TrainElement("Back Top", "back_top.png", "init_back_top.png"),
-    "<back_right_top>": TrainElement("Back Left Top", "back_left_top.png", "init_back_left_top.png"),
-    "<right_top>": TrainElement("Left Top", "left_top.png", "init_left_top.png"),
-    "<front_right_top>": TrainElement("Front Left Top", "front_left_top.png", "init_front_left_top.png"),
-    "<front_top>": TrainElement("Front Top", "front_top.png", "init_front_top.png"),
-    "<front_left_top>": TrainElement("Front Right Top", "front_right_top.png", "init_front_right_top.png"),
-    "<left>": TrainElement("Right", "right.png", "init_right.png"),
-    "<back_left>": TrainElement("Back Right", "back_right.png", "init_back_right.png"),
-    "<back>": TrainElement("Back", "back.png", "init_back.png"),
-    "<back_right>": TrainElement("Back Left", "back_left.png", "init_back_left.png"),
-    "<right>": TrainElement("Left", "left.png", "init_left.png"),
-    "<front_right>": TrainElement("Front Left", "front_left.png", "init_front_left.png"),
-    "<front>": TrainElement("Front", "front.png", "init_front.png"),
-    "<front_left>": TrainElement("Front Right", "front_right.png", "init_front_right.png")
-}
 
 for train_element in train_elements.values():
     init_image = start_image.copy()
@@ -192,9 +206,9 @@ def generate_duck_images(model_path, strength=1):
 #%% 
 command = [
     'ns-train',
-    'instant-ngp',
+    model_type,
     '--data', './', 
-    '--max-num-iterations', '200',
+    '--max-num-iterations', str(steps),
     'nerfstudio-data',
     '--orientation-method', 'none',
     '--center_method', 'none'
@@ -267,7 +281,6 @@ def read_stream(stream, stream_name):
 
 
 # %%
-max_iterations = 9
 for iteration in range(max_iterations):
 
     rename_new_file(iteration)
